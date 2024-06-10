@@ -43,7 +43,8 @@ const eventTable = `
         description TEXT NOT NULL,
         date DATE NOT NULL,
         time TIME NOT NULL,
-        location VARCHAR(255) NOT NULL
+        location VARCHAR(255) NOT NULL,
+        image blob NOT NULL
     )
 `;
 
@@ -55,5 +56,16 @@ db.query(eventTable, (err) => {
     console.log("Event table created successfully!");
 });
 
+const cmsTable = `
+    CREATE TABLE IF NOT EXISTS cms (
+        id INT PRIMARY KEY AUTO_INCREMENT,
+        title VARCHAR(255) NOT NULL,
+        description TEXT NOT NULL,
+        date DATE NOT NULL,
+        time TIME NOT NULL,
+        location VARCHAR(255) NOT NULL,
+        image blob NOT NULL
+    )
+`;
 
 export default db;
