@@ -43,8 +43,7 @@ const eventTable = `
         description TEXT NOT NULL,
         date DATE NOT NULL,
         time TIME NOT NULL,
-        location VARCHAR(255) NOT NULL,
-        image blob NOT NULL
+        image BLOB NOT NULL
     )
 `;
 
@@ -64,8 +63,16 @@ const cmsTable = `
         date DATE NOT NULL,
         time TIME NOT NULL,
         location VARCHAR(255) NOT NULL,
-        image blob NOT NULL
+        image BLOB NOT NULL
     )
 `;
+
+db.query(cmsTable, (err) => {
+    if (err) {
+        console.error("Error creating cms table: ", err);
+        return;
+    }
+    console.log("CMS table created successfully!");
+});
 
 export default db;

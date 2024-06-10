@@ -4,7 +4,6 @@ import db from '../database/db.js';
 
 const jwtSecret = "secret";  
 
-// Register a new user
 export const registerUser = async (req, res) => {
     const { email, username, password, museum, phone } = req.body;
 
@@ -27,7 +26,6 @@ export const registerUser = async (req, res) => {
     }
 };
 
-// Login user, menampilkan token email, dan username
 export const loginUser = (req, res) => {
     const { email, password } = req.body;
 
@@ -45,7 +43,7 @@ export const loginUser = (req, res) => {
                 const validPassword = await bcrypt.compare(password, user.password);
 
                 if (validPassword) {
-                    const token = jwt.sign({ email: user.email, username: user.username, password: user.password }, jwtSecret);
+                    const token = jwt.sign({ email: user.email, username: user.username }, jwtSecret);
 
                     res.status(200).send({ token });
                 } else {
@@ -54,4 +52,17 @@ export const loginUser = (req, res) => {
             }
         }
     );
+};
+
+export const authenticateToken = (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+
+    if (!token) return res.sendStatus(401);
+
+    jwt.verify(token, jwtSecret, (err, user) => {
+        if (err) return res.sendStatus(403);
+        req.user = user;
+        next();
+    });
 };
