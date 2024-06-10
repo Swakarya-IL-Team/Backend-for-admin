@@ -40,10 +40,11 @@ const eventTable = `
     CREATE TABLE IF NOT EXISTS event (
         id INT PRIMARY KEY AUTO_INCREMENT,
         title VARCHAR(255) NOT NULL,
+        image BLOB NOT NULL,
         description TEXT NOT NULL,
-        date DATE NOT NULL,
-        time TIME NOT NULL,
-        image BLOB NOT NULL
+        dateStart DATE NOT NULL,
+        dateEnd DATE NOT NULL,
+        price INT NOT NULL
     )
 `;
 
