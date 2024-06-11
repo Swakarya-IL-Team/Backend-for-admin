@@ -39,12 +39,12 @@ db.query(usersTable, (err) => {
 const eventTable = `
     CREATE TABLE IF NOT EXISTS event (
         id INT PRIMARY KEY AUTO_INCREMENT,
-        title VARCHAR(255) NOT NULL,
-        image BLOB NOT NULL,
-        description TEXT NOT NULL,
-        dateStart DATE NOT NULL,
-        dateEnd DATE NOT NULL,
-        price INT NOT NULL
+        event_name VARCHAR(255) NOT NULL,
+        event_picture LONGBLOB,
+        event_description TEXT NOT NULL,
+        event_date_start DATE NOT NULL,
+        event_date_end DATE NOT NULL,
+        event_price INT NOT NULL
     )
 `;
 
