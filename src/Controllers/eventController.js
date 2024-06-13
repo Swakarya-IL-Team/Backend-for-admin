@@ -1,24 +1,36 @@
 import db from '../database/db.js';
-
-// Middleware to handle image uploads
 import multer from 'multer';
-const storage = multer.memoryStorage();
+import fs from 'fs';
+import path from 'path';
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        const uploadPath = path.join(__dirname, '../uploads');
+        if (!fs.existsSync(uploadPath)) {
+            fs.mkdirSync(uploadPath, { recursive: true });
+        }
+        cb(null, uploadPath);
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + path.extname(file.originalname));
+    }
+});
 const upload = multer({ storage: storage });
 
 export const addEvent = [upload.single('event_picture'), (req, res) => {
     const { event_name, event_description, event_date_start, event_date_end, event_price } = req.body;
-    const event_picture = req.file ? req.file.buffer : null;
+    const event_picture = req.file ? req.file.filename : null;
 
     db.query(
         "INSERT INTO event (event_name, event_picture, event_description, event_date_start, event_date_end, event_price) VALUES (?, ?, ?, ?, ?, ?)",
         [event_name, event_picture, event_description, event_date_start, event_date_end, event_price],
         (err, result) => {
             if (err) {
-                res.status(400).send({ error: "An error occurred while adding the event." });
+                res.status(400).send({ error: "Terjadi kesalahan saat menambahkan acara." });
             } else {
                 db.query("SELECT * FROM event WHERE id = ?", [result.insertId], (err, event) => {
                     if (err) {
-                        res.status(400).send({ error: "An error occurred while retrieving the new event." });
+                        res.status(400).send({ error: "Terjadi kesalahan saat mengambil acara baru." });
                     } else {
                         res.status(201).send(event);
                     }
@@ -53,18 +65,18 @@ export const getEventById = (req, res) => {
 export const updateEvent = [upload.single('event_picture'), (req, res) => {
     const { id } = req.params;
     const { event_name, event_description, event_date_start, event_date_end, event_price } = req.body;
-    const event_picture = req.file ? req.file.buffer : null;
+    const event_picture = req.file ? req.file.filename : null;
 
     db.query(
         "UPDATE event SET event_name = ?, event_picture = ?, event_description = ?, event_date_start = ?, event_date_end = ?, event_price = ? WHERE id = ?",
         [event_name, event_picture, event_description, event_date_start, event_date_end, event_price, id],
         (err) => {
             if (err) {
-                res.status(400).send({ error: "An error occurred while updating the event." });
+                res.status(400).send({ error: "Terjadi kesalahan saat memperbarui acara." });
             } else {
                 db.query("SELECT * FROM event WHERE id = ?", [id], (err, event) => {
                     if (err) {
-                        res.status(400).send({ error: "An error occurred while retrieving the updated event." });
+                        res.status(400).send({ error: "Terjadi kesalahan saat mengambil acara yang diperbarui." });
                     } else {
                         res.status(200).send(event);
                     }

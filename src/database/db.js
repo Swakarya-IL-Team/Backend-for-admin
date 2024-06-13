@@ -24,7 +24,7 @@ const usersTable = `
         password VARCHAR(255) NOT NULL,
         museum VARCHAR(255) NOT NULL,
         phone VARCHAR(255) NOT NULL,
-        image BLOB
+        image VARCHAR(255) 
     )
 `;
 

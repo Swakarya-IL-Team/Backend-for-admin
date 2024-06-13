@@ -1,5 +1,7 @@
 import express from 'express';
 import cors from 'cors';
+import multer from 'multer';
+import path from 'path';
 import db from './src/database/db.js';
 import authRoutes from './src/Routes/authRoutes.js';
 import eventRoutes from './src/Routes/eventRoutes.js';
@@ -19,14 +21,37 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Additional setup for handling form data
-app.use(express.static('public')); // Serve files from the 'public' directory
-app.use('/events', express.static('public')); // Serve files from the 'public' directory for event images
+// Multer setup for file uploads
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/');
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + path.extname(file.originalname)); // Append the current timestamp to the original filename
+  }
+});
+
+const upload = multer({ storage: storage });
+
+// Static files setup
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Routes
 app.use('/auth', authRoutes);
 app.use('/events', eventRoutes);
 app.use('/cms', cmsRoutes);
+
+// Example route for handling file uploads
+app.post('/upload', upload.single('file'), (req, res) => {
+  try {
+    res.status(200).json({
+      message: 'File uploaded successfully',
+      file: req.file
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 // Start server
 app.listen(port, () => {
