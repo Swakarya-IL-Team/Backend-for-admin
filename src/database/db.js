@@ -40,7 +40,7 @@ const eventTable = `
     CREATE TABLE IF NOT EXISTS event (
         id INT PRIMARY KEY AUTO_INCREMENT,
         event_name VARCHAR(255) NOT NULL,
-        event_picture LONGBLOB,
+        event_picture LONGTEXT,
         event_description TEXT NOT NULL,
         event_date_start DATE NOT NULL,
         event_date_end DATE NOT NULL,

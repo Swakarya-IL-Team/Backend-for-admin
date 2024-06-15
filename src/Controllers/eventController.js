@@ -2,31 +2,19 @@ import db from '../database/db.js';
 import multer from 'multer';
 import fs from 'fs';
 import path from 'path';
+import { upload } from '../Middleware/Multer.js';
 
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        const uploadPath = path.join(__dirname, '../uploads');
-        if (!fs.existsSync(uploadPath)) {
-            fs.mkdirSync(uploadPath, { recursive: true });
-        }
-        cb(null, uploadPath);
-    },
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + path.extname(file.originalname));
-    }
-});
-const upload = multer({ storage: storage });
 
-export const addEvent = [upload.single('event_picture'), (req, res) => {
+export const addEvent =  (req, res) => {
     const { event_name, event_description, event_date_start, event_date_end, event_price } = req.body;
     const event_picture = req.file ? req.file.filename : null;
-
+    console.log(event_name);
     db.query(
         "INSERT INTO event (event_name, event_picture, event_description, event_date_start, event_date_end, event_price) VALUES (?, ?, ?, ?, ?, ?)",
         [event_name, event_picture, event_description, event_date_start, event_date_end, event_price],
         (err, result) => {
             if (err) {
-                res.status(400).send({ error: "Terjadi kesalahan saat menambahkan acara." });
+                res.status(400).send({ error: "Terjadi kesalahan saat menambahkan acara.", err});
             } else {
                 db.query("SELECT * FROM event WHERE id = ?", [result.insertId], (err, event) => {
                     if (err) {
@@ -38,7 +26,7 @@ export const addEvent = [upload.single('event_picture'), (req, res) => {
             }
         }
     );
-}];
+};
 
 export const getEvents = (req, res) => {
     db.query("SELECT * FROM event", (err, result) => {
