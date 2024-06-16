@@ -5,9 +5,9 @@ import path from 'path';
 import db from './src/database/db.js';
 import authRoutes from './src/Routes/authRoutes.js';
 import eventRoutes from './src/Routes/eventRoutes.js';
-import cmsRoutes from './src/Routes/cmsRoutes.js';
 import { upload } from './src/Middleware/Multer.js';
 import { fileURLToPath } from 'url';
+import museuminfoRoutes from './src/Routes/museuminfoRoutes.js';
 
 const app = express();
 const port = 3000;
@@ -43,7 +43,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Routes
 app.use('/auth', authRoutes);
 app.use('/events', eventRoutes);
-app.use('/cms', cmsRoutes);
+app.use('/museuminfo', museuminfoRoutes);
 
 // Example route for handling file uploads
 // app.post('/upload', upload.single('file'), (req, res) => {

@@ -56,24 +56,27 @@ db.query(eventTable, (err) => {
     console.log("Event table created successfully!");
 });
 
-const cmsTable = `
-    CREATE TABLE IF NOT EXISTS cms (
+const museumInformasiTable = `
+    CREATE TABLE IF NOT EXISTS MuseumInformasi (
         id INT PRIMARY KEY AUTO_INCREMENT,
-        title VARCHAR(255) NOT NULL,
+        museum_name VARCHAR(255) NOT NULL,
+        thumbnail_picture LONGTEXT,
+        other_pictures LONGTEXT,
         description TEXT NOT NULL,
-        date DATE NOT NULL,
-        time TIME NOT NULL,
-        location VARCHAR(255) NOT NULL,
-        image BLOB NOT NULL
+        address VARCHAR(255) NOT NULL,
+        open_hours VARCHAR(255) NOT NULL,
+        other_information TEXT,
+        transportation TEXT,
+        facility TEXT
     )
 `;
 
-db.query(cmsTable, (err) => {
+db.query(museumInformasiTable, (err) => {
     if (err) {
-        console.error("Error creating cms table: ", err);
+        console.error("Error creating MuseumInformasi table: ", err);
         return;
     }
-    console.log("CMS table created successfully!");
+    console.log("MuseumInformasi table created successfully!");
 });
 
 export default db;

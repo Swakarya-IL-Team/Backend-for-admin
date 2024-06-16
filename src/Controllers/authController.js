@@ -8,8 +8,8 @@ const jwtSecret = "secret";
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-        user: 'your-email@gmail.com',
-        pass: 'your-email-password'
+        user: 'swakarya12@gmail.com',
+        pass: ''
     }
 });
 
@@ -101,7 +101,7 @@ export const sendResetCode = async (req, res) => {
                     res.status(400).send({ error: "An error occurred." });
                 } else {
                     const mailOptions = {
-                        from: 'your-email@gmail.com',
+                        from: 'swakarya12@gmail.com',
                         to: email,
                         subject: 'Password Reset Code',
                         text: `Your password reset code is: ${resetCode}`
