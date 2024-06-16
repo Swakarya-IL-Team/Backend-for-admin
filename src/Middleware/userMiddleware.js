@@ -1,8 +1,6 @@
-import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import db from '../database/db.js';  
 
-const jwtSecret = "secret";  
+const jwtSecret = "secret";
 
 export const authenticateToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
@@ -22,4 +20,3 @@ export const authenticateToken = (req, res, next) => {
         next();
     });
 };
-

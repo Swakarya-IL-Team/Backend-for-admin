@@ -8,7 +8,7 @@ const router = express.Router();
 router.post('/', authenticateToken, upload.single('event_picture'), addEvent);
 router.get('/', authenticateToken, getEvents);
 router.get('/:id', authenticateToken, getEventById);
-router.put('/:id', authenticateToken, upload.single('event_picture'), updateEvent);
+router.put('/:id', authenticateToken, updateEvent);
 router.delete('/:id', authenticateToken, deleteEvent);
 
 export default router;

@@ -2,14 +2,23 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import db from '../database/db.js';
 import nodemailer from 'nodemailer';
+import { upload } from '../Middleware/Multer.js';
 
 const jwtSecret = "secret";
 
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-        user: 'swakarya12@gmail.com',
-        pass: ''
+        user: 'yout email',
+        pass: 'your password aplication'
+    }
+});
+
+transporter.verify((error, success) => {
+    if (error) {
+        console.error('Error with email transporter:', error);
+    } else {
+        console.log('Email transporter is ready to send messages.');
     }
 });
 
@@ -52,7 +61,7 @@ export const loginUser = (req, res) => {
                 const validPassword = await bcrypt.compare(password, user.password);
 
                 if (validPassword) {
-                    const token = jwt.sign({ email: user.email, username: user.username }, jwtSecret);
+                    const token = jwt.sign({ email: user.email, username: user.username }, jwtSecret, { expiresIn: '1h' });
 
                     res.status(200).send({ token });
                 } else {
@@ -64,61 +73,87 @@ export const loginUser = (req, res) => {
 };
 
 export const updateProfile = async (req, res) => {
-    const { email, username, museum, phone } = req.body;
+    const { email, username, museum, phone, password } = req.body;
     const { email: userEmail } = req.user;
+    const picture_profile = req.file ? req.file.path : null;
 
     try {
-        db.query(
-            "UPDATE users SET email = ?, username = ?, museum = ?, phone = ? WHERE email = ?",
-            [email, username, museum, phone, userEmail],
-            (err) => {
-                if (err) {
-                    res.status(400).send({ error: "An error occurred during the update." });
-                } else {
-                    res.status(200).send({ message: "Profile updated successfully!" });
-                }
+        const hashedPassword = password ? await bcrypt.hash(password, 10) : null;
+
+        let query = "UPDATE users SET email = ?, username = ?, museum = ?, phone = ?";
+        let params = [email, username, museum, phone];
+
+        if (hashedPassword) {
+            query += ", password = ?";
+            params.push(hashedPassword);
+        }
+
+        if (picture_profile) {
+            query += ", picture_profile = ?";
+            params.push(picture_profile);
+        }
+
+        query += " WHERE email = ?";
+        params.push(userEmail);
+
+        db.query(query, params, (err) => {
+            if (err) {
+                res.status(400).send({ error: "An error occurred during the update." });
+            } else {
+                res.status(200).send({ message: "Profile updated successfully!" });
             }
-        );
+        });
     } catch (err) {
         res.status(500).send({ error: "Internal server error." });
     }
 };
 
-// New: Forgot Password Logic
 export const sendResetCode = async (req, res) => {
     const { email } = req.body;
 
-    db.query("SELECT * FROM users WHERE email = ?", [email], (err, result) => {
-        if (err) {
-            res.status(400).send({ error: "An error occurred." });
-        } else if (result.length === 0) {
-            res.status(400).send({ error: "No user found with this email." });
-        } else {
-            const resetCode = Math.floor(100000 + Math.random() * 900000).toString();  // generate 6-digit code
+    try {
+        db.query("SELECT * FROM users WHERE email = ?", [email], (err, result) => {
+            if (err) {
+                console.error('Database query error:', err);
+                return res.status(400).send({ error: "An error occurred." });
+            } else if (result.length === 0) {
+                return res.status(400).send({ error: "No user found with this email." });
+            } else {
+                const resetCode = Math.floor(1000 + Math.random() * 9000).toString();  // generate 4-digit code
 
-            db.query("UPDATE users SET reset_code = ? WHERE email = ?", [resetCode, email], async (err) => {
-                if (err) {
-                    res.status(400).send({ error: "An error occurred." });
-                } else {
-                    const mailOptions = {
-                        from: 'swakarya12@gmail.com',
-                        to: email,
-                        subject: 'Password Reset Code',
-                        text: `Your password reset code is: ${resetCode}`
-                    };
+                db.query("UPDATE users SET reset_code = ? WHERE email = ?", [resetCode, email], async (err) => {
+                    if (err) {
+                        console.error('Database update error:', err);
+                        return res.status(400).send({ error: "An error occurred." });
+                    } else {
+                        const mailOptions = {
+                            from: 'your email',
+                            to: email,
+                            subject: 'Password Reset Code',
+                            text: `Your password reset code is: ${resetCode}`
+                        };
 
-                    transporter.sendMail(mailOptions, (error, info) => {
-                        if (error) {
-                            res.status(500).send({ error: "Failed to send email." });
-                        } else {
-                            res.status(200).send({ message: "Reset code sent successfully!" });
-                        }
-                    });
-                }
-            });
-        }
-    });
+                        transporter.sendMail(mailOptions, (error, info) => {
+                            if (error) {
+                                console.error('Error sending email:', error);
+                                return res.status(500).send({ error: "Failed to send email." });
+                            } else {
+                                console.log('Email sent:', info.response);
+                                return res.status(200).send({ message: "Reset code sent successfully!" });
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    } catch (error) {
+        console.error('Unexpected error:', error);
+        return res.status(500).send({ error: "Internal server error." });
+    }
 };
+
+
+
 
 export const verifyResetCode = (req, res) => {
     const { email, resetCode } = req.body;
